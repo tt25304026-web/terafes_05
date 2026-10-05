@@ -1,0 +1,510 @@
+```css
+/* ========================================
+   全体
+======================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    font-family:
+        "Segoe UI",
+        "Hiragino Kaku Gothic ProN",
+        "Yu Gothic",
+        sans-serif;
+
+    background-color: #f5f5f5;
+    color: #001219;
+}
+
+
+
+/* ========================================
+   ヘッダー
+======================================== */
+
+header {
+    height: 80px;
+
+    background-color: #005f73;
+    color: white;
+
+    padding: 15px 30px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+header h1 {
+    margin: 0;
+
+    font-size: 24px;
+}
+
+
+header p {
+    margin: 3px 0 0;
+
+    font-size: 13px;
+}
+
+
+.staff {
+    background-color: #0a9396;
+
+    padding: 10px 18px;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+}
+
+
+
+/* ========================================
+   メイン
+======================================== */
+
+main {
+    max-width: 1200px;
+
+    margin: 30px auto;
+
+    padding: 0 20px;
+
+    display: grid;
+
+    grid-template-columns: 2fr 1fr;
+
+    gap: 25px;
+}
+
+
+
+/* ========================================
+   セクション共通
+======================================== */
+
+section {
+    background-color: white;
+
+    border-radius: 12px;
+
+    padding: 25px;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+
+section h2 {
+    margin-top: 0;
+
+    margin-bottom: 20px;
+
+    font-size: 20px;
+}
+
+
+
+/* ========================================
+   カテゴリーボタン
+======================================== */
+
+.category {
+    display: flex;
+
+    gap: 10px;
+
+    margin-bottom: 25px;
+}
+
+
+.category button {
+    padding: 10px 18px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 20px;
+
+    background-color: white;
+
+    color: #333;
+
+    cursor: pointer;
+
+    font-size: 14px;
+}
+
+
+.category button:hover {
+    background-color: #e9d8a6;
+}
+
+
+.category button.active {
+    background-color: #005f73;
+
+    color: white;
+
+    border-color: #005f73;
+}
+
+
+
+/* ========================================
+   商品一覧
+======================================== */
+
+.products {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 15px;
+}
+
+
+
+/* ========================================
+   商品カード
+======================================== */
+
+.product {
+    border: 1px solid #ddd;
+
+    border-radius: 10px;
+
+    padding: 18px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    transition: 0.2s;
+}
+
+
+.product:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+
+/* 商品情報 */
+
+.product-info {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.product-icon {
+    width: 120px;
+    height: 120px;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    flex-shrink: 0;
+}
+
+.product-icon img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    display: block;
+}
+
+
+.product h3 {
+    margin: 0 0 5px;
+
+    font-size: 16px;
+}
+
+
+.product p {
+    margin: 0;
+
+    color: #555;
+
+    font-weight: bold;
+}
+
+
+
+/* ========================================
+   追加ボタン
+======================================== */
+
+.add-button {
+    border: none;
+
+    background-color: #0a9396;
+
+    color: white;
+
+    padding: 9px 15px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+}
+
+
+.add-button:hover {
+    background-color: #005f73;
+}
+
+
+
+/* ========================================
+   右側
+======================================== */
+
+aside {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+
+
+/* ========================================
+   注文内容
+======================================== */
+
+.order-item {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid #eee;
+}
+
+
+.order-item strong {
+    font-size: 15px;
+}
+
+
+.order-item p {
+    margin: 5px 0 0;
+
+    color: #777;
+
+    font-size: 13px;
+}
+
+
+.order-item span {
+    font-weight: bold;
+}
+
+
+
+/* ========================================
+   合計
+======================================== */
+
+.total {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-top: 20px;
+
+    padding-top: 15px;
+
+    border-top: 2px solid #005f73;
+
+    font-size: 18px;
+}
+
+
+.total strong {
+    font-size: 24px;
+
+    color: #005f73;
+}
+
+
+
+/* ========================================
+   会計
+======================================== */
+
+#payment label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-weight: bold;
+}
+
+
+#payment input {
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    font-size: 16px;
+}
+
+
+#payment input:focus {
+    outline: none;
+
+    border-color: #0a9396;
+
+    box-shadow:
+        0 0 0 2px rgba(10, 147, 150, 0.15);
+}
+
+
+
+/* ========================================
+   お釣り
+======================================== */
+
+.change {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-top: 20px;
+
+    padding: 15px;
+
+    background-color: #f5f5f5;
+
+    border-radius: 8px;
+}
+
+
+.change strong {
+    font-size: 20px;
+
+    color: #005f73;
+}
+
+
+
+/* ========================================
+   注文確定ボタン
+======================================== */
+
+.confirm-button {
+    width: 100%;
+
+    margin-top: 20px;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background-color: #005f73;
+
+    color: white;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+
+.confirm-button:hover {
+    background-color: #0a9396;
+}
+
+
+
+/* ========================================
+   フッター
+======================================== */
+
+footer {
+    margin-top: 40px;
+
+    padding: 20px;
+
+    background-color: #001219;
+
+    color: white;
+
+    text-align: center;
+}
+
+
+footer p {
+    margin: 0;
+
+    font-size: 13px;
+}
+
+
+
+/* ========================================
+   スマートフォン対応
+======================================== */
+
+@media (max-width: 800px) {
+
+    main {
+        grid-template-columns: 1fr;
+    }
+
+
+    .products {
+        grid-template-columns: 1fr;
+    }
+
+
+    header {
+        height: auto;
+
+        gap: 15px;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+}
+```

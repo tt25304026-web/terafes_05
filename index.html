@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cafe販売システム</title>
+
+    <!-- CSSを読み込む -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ==============================
+         ヘッダー
+    ============================== -->
+    <header>
+
+        <div>
+            <h1>☕ Cafe販売システム</h1>
+            <p>学園祭 Cafe</p>
+        </div>
+
+        <div class="staff">
+            スタッフ：<strong>田中</strong>
+        </div>
+
+    </header>
+
+
+    <!-- ==============================
+         メイン
+    ============================== -->
+    <main>
+
+
+        <!-- ==============================
+             商品一覧
+        ============================== -->
+        <section id="product-list">
+
+            <h2>商品一覧</h2>
+
+
+            <!-- カテゴリー -->
+            <nav class="category">
+
+                <button class="active">すべて</button>
+                <button>ドリンク</button>
+                <button>フード</button>
+                <button>デザート</button>
+
+            </nav>
+
+
+            <!-- 商品一覧 -->
+            <div class="products">
+
+
+                <!-- コーヒー -->
+               <article class="product">
+
+    <div class="product-info">
+
+        <div class="product-icon">
+            <img src="images/coffee.jpg" alt="コーヒー">
+        </div>
+
+        <div>
+            <h3>コーヒー</h3>
+            <p>¥400</p>
+        </div>
+
+    </div>
+
+    <button class="add-button">
+        追加
+    </button>
+
+</article>
+
+
+                <!-- 紅茶 -->
+                <article class="product">
+
+                    <div class="product-info">
+
+                       <div class="product-icon">
+                          <img src="images/tea.jpg" alt="紅茶">
+                        </div>
+
+                        <div>
+                            <h3>紅茶</h3>
+                            <p>¥350</p>
+                        </div>
+
+                    </div>
+
+                    <button class="add-button">
+                        追加
+                    </button>
+
+                </article>
+
+
+                <!-- ケーキ -->
+                <article class="product">
+
+                    <div class="product-info">
+
+                        <div class="product-icon">
+                           <img src="images/cake.jpg" alt="ケーキ">
+                        </div>
+                        <div>
+                            <h3>ケーキ</h3>
+                            <p>¥500</p>
+                        </div>
+
+                    </div>
+
+                    <button class="add-button">
+                        追加
+                    </button>
+
+                </article>
+
+
+                <!-- サンドイッチ -->
+                <article class="product">
+
+                    <div class="product-info">
+
+                        <div class="product-icon">
+                            <img src="images/Sandwich.jpg" alt="サンドイッチ">
+                        </div>
+
+                        <div>
+                            <h3>サンドイッチ</h3>
+                            <p>¥450</p>
+                        </div>
+
+                    </div>
+
+                    <button class="add-button">
+                        追加
+                    </button>
+
+                </article>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==============================
+             注文・会計
+        ============================== -->
+        <aside>
+
+
+            <!-- ==============================
+                 注文内容
+            ============================== -->
+            <section id="order">
+
+                <h2>🛒 注文内容</h2>
+
+
+                <!-- 注文商品 -->
+                <div class="order-item">
+
+                    <div>
+                        <strong>コーヒー</strong>
+                        <p>¥400 × 2</p>
+                    </div>
+
+                    <span>¥800</span>
+
+                </div>
+
+
+                <div class="order-item">
+
+                    <div>
+                        <strong>ケーキ</strong>
+                        <p>¥500 × 1</p>
+                    </div>
+
+                    <span>¥500</span>
+
+                </div>
+
+
+                <!-- 合計 -->
+                <div class="total">
+
+                    <span>合計</span>
+
+                    <strong>¥1,300</strong>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ==============================
+                 会計
+            ============================== -->
+            <section id="payment">
+
+                <h2>💴 会計</h2>
+
+
+                <!-- 支払金額 -->
+                <label for="payment-money">
+                    支払金額
+                </label>
+
+                <input
+                    type="number"
+                    id="payment-money"
+                    placeholder="金額を入力"
+                >
+
+
+                <!-- お釣り -->
+                <div class="change">
+
+                    <span>お釣り</span>
+
+                    <strong>¥700</strong>
+
+                </div>
+
+
+                <!-- 確定ボタン -->
+                <button class="confirm-button">
+                    注文を確定する
+                </button>
+
+            </section>
+
+        </aside>
+
+    </main>
+
+
+    <!-- ==============================
+         フッター
+    ============================== -->
+    <footer>
+
+        <p>&copy; Cafe販売システム</p>
+
+    </footer>
+
+</body>
+
+</html>
+```
