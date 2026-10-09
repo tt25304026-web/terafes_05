@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cafe販売システム</title>
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+</head>
+<body>
+<header><div><h1>☕ Cafe販売システム</h1><p>学園祭 Cafe</p></div></header>
+<nav class="nav">
+<button class="nav-button active" data-screen="productsScreen">商品一覧</button>
+<button class="nav-button" data-screen="orderScreen">注文内容 <span id="cartBadge">0</span></button>
+<button class="nav-button" data-screen="paymentScreen">会計</button>
+<button class="nav-button" data-screen="historyScreen">注文履歴</button>
+<button class="nav-button" id="adminNav">管理者</button>
+</nav>
+<main>
+<section class="screen active" id="productsScreen"><div class="panel">
+<h2>商品一覧</h2>
+<div class="categories" id="categories">
+<button class="category active" data-category="すべて">すべて</button><button class="category" data-category="ドリンク">ドリンク</button><button class="category" data-category="フード">フード</button><button class="category" data-category="デザート">デザート</button>
+</div>
+<label for="search">商品検索</label><input id="search" type="search" placeholder="商品名・カテゴリーを入力（例：コーヒー）" autocomplete="off">
+<p id="searchMessage" class="muted"></p><div class="products" id="products"></div><p id="notice" class="notice"></p>
+<div class="actions"><button class="primary" data-go="orderScreen">注文内容を確認する →</button></div>
+</div></section>
+<section class="screen" id="orderScreen"><div class="panel">
+<h2>🛒 注文内容</h2><p class="muted">選択した商品の数量を変更したり、削除したりできます。</p>
+<div id="cart"></div><div class="total"><span>合計</span><strong id="total">¥0</strong></div>
+<div class="actions split"><button class="secondary" data-go="productsScreen">← 商品一覧に戻る</button><button class="primary" data-go="paymentScreen">会計へ進む →</button></div>
+</div></section>
+<section class="screen" id="paymentScreen"><div class="panel narrow">
+<h2>🎫 会計</h2><div class="payment-summary"><span>お支払い合計</span><strong id="paymentTotal">¥0</strong></div>
+<label for="paymentMethod">支払方法</label>
+<select id="paymentMethod" class="payment-select">
+<option value="現金">現金</option>
+<option value="クレジットカード">クレジットカード</option>
+<option value="電子マネー">電子マネー</option>
+<option value="ポイントカード">ポイントカード</option>
+</select>
+<div id="cashPaymentArea">
+<label for="payment">お預かり金額（現金）</label><input id="payment" type="number" min="0" step="1" placeholder="お預かり金額を入力">
+<div class="change"><span id="changeLabel">お釣り</span><strong id="change">¥0</strong></div>
+</div>
+<p id="paymentMethodNote" class="muted">現金でお支払いします。</p>
+<button class="primary full" id="checkout">注文を確定する</button><p id="paymentNotice" class="notice"></p>
+<div class="actions"><button class="secondary" data-go="orderScreen">← 注文内容に戻る</button></div>
+</div></section>
+<section class="screen" id="historyScreen"><div class="panel">
+<h2>📋 注文履歴</h2><p class="muted">確定した注文を新しい順に表示します。</p>
+<div id="history"></div><button class="secondary" id="clearHistory">履歴を削除</button>
+</div></section>
+<section class="screen" id="adminLoginScreen"><div class="panel narrow"><h2>🔐 管理者ログイン</h2><p class="muted">管理者専用機能を利用するにはログインしてください。</p><label for="adminUser">ユーザー名</label><input id="adminUser" autocomplete="username" placeholder="admin"><label for="adminPass">パスワード</label><input id="adminPass" type="password" autocomplete="current-password" placeholder="パスワード"><p class="muted">デモ用：ユーザー名 admin / パスワード admin123</p><p id="adminLoginError" class="notice"></p><button class="primary full" id="adminLoginButton">ログイン</button><div class="actions"><button class="secondary" data-go="productsScreen">戻る</button></div></div></section>
+<section class="screen" id="adminScreen"><div class="panel"><div class="admin-heading"><div><h2>🛠 管理者ダッシュボード</h2><p class="muted">商品・在庫・売上・販売状況を管理できます。</p></div><button class="secondary" id="adminLogout">ログアウト</button></div>
+<div class="admin-stats" id="adminStats"></div>
+<h3>商品情報・在庫管理</h3><form id="productForm" class="admin-form"><input id="editProductId" type="hidden"><div><label for="adminProductName">商品名</label><input id="adminProductName" required maxlength="60" placeholder="商品名"></div><div><label for="adminProductCategory">カテゴリー</label><select id="adminProductCategory" class="payment-select"><option>ドリンク</option><option>フード</option><option>デザート</option></select></div><div><label for="adminProductPrice">価格（円）</label><input id="adminProductPrice" type="number" min="0" step="1" required></div><div><label for="adminProductStock">在庫数</label><input id="adminProductStock" type="number" min="0" step="1" required></div><button class="primary" type="submit">商品を保存</button><button class="secondary" type="button" id="productFormReset">入力をクリア</button></form><div id="adminProductTable"></div>
+<h3>売上確認・販売状況分析</h3><div class="admin-filters"><label for="salesPeriod">集計期間</label><select id="salesPeriod" class="payment-select"><option value="today">今日</option><option value="7">過去7日間</option><option value="30">過去30日間</option><option value="all">全期間</option></select></div><div id="salesAnalysis"></div></div></section>
+</main>
+<footer>© Cafe販売システム</footer>
+</body></html>
