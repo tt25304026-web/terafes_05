@@ -21,6 +21,25 @@ const defaultProducts = [
 {id:20,name:"アイスクリーム",price:350,category:"デザート",stock:15},
 {id:21,name:"フルーツタルト",price:500,category:"デザート",stock:10}
 ];
+const productImages={
+ "コーヒー":"images/coffee.jpg",
+ "紅茶":"images/tea.jpg",
+ "ジュース":"images/juice.jpg",
+ "カフェラテ":"images/cafe-latte.jpg",
+ "アイスコーヒー":"images/iced-coffee.jpg",
+ "レモネード":"images/lemonade.jpg",
+ "ミルクティー":"images/milk-tea.jpg",
+ "サンドイッチ":"images/sandwich.jpg",
+ "ホットドッグ":"images/hot-dog.jpg",
+ "トースト":"images/toast.jpg",
+ "ケーキ":"images/cake.jpg",
+ "クッキー":"images/cookie.jpg",
+ "プリン":"images/pudding.jpg",
+ "チョコレートケーキ":"images/chocolate-cake.jpg",
+ "ドーナツ":"images/donuts.jpg",
+ "アイスクリーム":"images/ice-cream.jpg",
+ "フルーツタルト":"images/fruit-tart.jpg"
+};
 function loadData(key,fallback){try{const x=localStorage.getItem(key);return x?JSON.parse(x):fallback}catch(e){return fallback}}
 const savedProducts=loadData("cafeProducts",[]);
 let products=defaultProducts.map(p=>{const old=savedProducts.find(x=>x.id===p.id);return old?{...p,...old}:{...p}});
@@ -39,7 +58,7 @@ function renderProducts(){
  const word=normalize(document.getElementById("search").value);
  const shown=products.filter(p=>(selectedCategory==="すべて"||p.category===selectedCategory)&&(!word||normalize(p.name+p.category).includes(word)));
  document.getElementById("searchMessage").textContent=`検索結果：${shown.length}件`;
- document.getElementById("products").innerHTML=shown.length?shown.map(p=>`<article class="product"><div class="product-photo">商品画像</div><div class="product-info"><div class="product-name">${safe(p.name)}</div><div class="price">${yen(p.price)}</div><div class="stock">在庫：${p.stock}</div></div><button class="add" data-add="${p.id}" ${p.stock<=0?"disabled":""}>追加</button></article>`).join(""):'<p class="empty">商品が見つかりません。商品名を確認してください。</p>';
+ document.getElementById("products").innerHTML=shown.length?shown.map(p=>`<article class="product"><div class="product-photo">${productImages[p.name]?`<img src="${productImages[p.name]}" alt="${safe(p.name)}">`:"商品画像"}</div><div class="product-info"><div class="product-name">${safe(p.name)}</div><div class="price">${yen(p.price)}</div><div class="stock">在庫：${p.stock}</div></div><button class="add" data-add="${p.id}" ${p.stock<=0?"disabled":""}>追加</button></article>`).join(""):'<p class="empty">商品が見つかりません。商品名を確認してください。</p>';
 }
 function total(){return cart.reduce((s,i)=>s+i.price*i.quantity,0)}
 function renderCart(){
