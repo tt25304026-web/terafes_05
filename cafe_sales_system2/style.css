@@ -31,6 +31,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .brand strong, .brand small { display: block; }
 .brand strong { font-family: Georgia, "Yu Mincho", serif; font-size: 21px; letter-spacing: .03em; }
 .brand small { margin-top: 3px; color: var(--muted); font-size: 11px; letter-spacing: .08em; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.language-button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); color: var(--brown); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.language-button:hover { border-color: var(--green); background: var(--green-pale); }
 .open-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid #dbe5d6; border-radius: 999px; background: #f5f8f1; color: var(--green-dark); font-size: 12px; font-weight: 700; }
 .open-badge > span:first-child { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: #6c9560; }
 .open-badge > span:last-child { width: auto; height: auto; border-radius: 0; background: transparent; white-space: nowrap; }
@@ -73,11 +76,18 @@ h3 { margin: 30px 0 14px; font-size: 18px; }
 .search-box:focus-within { border-color: #8ca184; box-shadow: 0 0 0 3px #526c5214; }
 .menu-toolbar #searchMessage { flex: 0 0 auto; margin: 0; font-size: 12px; }
 
-.products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; }
+.products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 17px; }
 .product { min-width: 0; overflow: hidden; display: flex; flex-direction: column; padding: 0; border: 1px solid var(--line); border-radius: 13px; background: white; box-shadow: 0 4px 14px #49382d08; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 .product:hover { transform: translateY(-2px); border-color: #d3ddcd; box-shadow: 0 10px 24px #49382d12; }
 .product-photo { width: 100%; height: 280px; flex: 0 0 280px; display: grid; place-items: center; overflow: hidden; border: 0; border-radius: 0; background: #f8f6f0; color: var(--muted); font-size: 12px; }
-.product-photo img { display: block; width: 100%; height: 100%; padding: 4px; object-fit: contain; object-position: center; }
+.product-photo img { display: block; width: 100%; height: 100%; padding: 4px; object-fit: contain; object-position: center; transition: transform .28s ease; }
+.product-photo > span { display: grid; width: 100%; height: 100%; place-items: center; }
+@media (hover: hover) and (pointer: fine) {
+  .product-photo:hover img { transform: scale(1.12); }
+}
+@media (hover: none) {
+  .product-photo:active img { transform: scale(1.08); }
+}
 .product-info { flex: 1; min-width: 0; padding: 16px 16px 8px; }
 .product-name { min-height: 1.5em; margin-bottom: 9px; overflow-wrap: anywhere; color: var(--brown); font-size: 16px; font-weight: 700; }
 .price { color: var(--green-dark); font-family: Georgia, "Yu Mincho", serif; font-size: 20px; font-weight: 700; }
@@ -175,6 +185,8 @@ footer { padding: 22px; background: #3f342b; color: #eee8dc; text-align: center;
   .brand-logo { width: 40px; height: 40px; flex-basis: 40px; }
   .brand strong { font-size: 16px; }
   .brand small { letter-spacing: 0; }
+  .header-actions { gap: 6px; }
+  .language-button { padding: 7px 8px; font-size: 11px; }
   .open-badge { flex: 0 0 auto; gap: 5px; padding: 6px 7px; font-size: 10px; }
   .product-photo { height: 280px; flex-basis: 280px; }
 }
