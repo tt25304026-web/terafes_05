@@ -26,12 +26,16 @@ const productImages={
  "紅茶":"images/tea.jpg",
  "ジュース":"images/juice.jpg",
  "カフェラテ":"images/cafe-latte.jpg",
+ "抹茶ラテ":"images/抹茶ラテ.jpg",
  "アイスコーヒー":"images/iced-coffee.jpg",
  "レモネード":"images/lemonade.jpg",
  "ミルクティー":"images/milk-tea.jpg",
  "サンドイッチ":"images/sandwich.jpg",
  "ホットドッグ":"images/hot-dog.jpg",
  "トースト":"images/toast.jpg",
+ "ピザトースト":"images/ピザトースト.jpg",
+ "フライドポテト":"images/フライドポテト.jpg",
+ "ホットサンド":"images/ホットサンド.jpg",
  "ケーキ":"images/cake.jpg",
  "クッキー":"images/cookie.jpg",
  "プリン":"images/pudding.jpg",
@@ -41,24 +45,50 @@ const productImages={
  "フルーツタルト":"images/fruit-tart.jpg"
 };
 function loadData(key,fallback){try{const x=localStorage.getItem(key);return x?JSON.parse(x):fallback}catch(e){return fallback}}
-const savedProducts=loadData("cafeProducts",[]);
-let products=defaultProducts.map(p=>{const old=savedProducts.find(x=>x.id===p.id);return old?{...p,...old}:{...p}});
-savedProducts.forEach(p=>{if(!products.some(x=>x.id===p.id))products.push(p)});
+const storedProducts=loadData("cafeProducts",[]);
+const savedProducts=Array.isArray(storedProducts)?storedProducts.filter(p=>p&&typeof p==="object"&&Number.isSafeInteger(Number(p.id))&&Number(p.id)>0):[];
+let products=defaultProducts.map(p=>{const old=savedProducts.find(x=>Number(x.id)===p.id);return old?{...p,...old,id:p.id}:{...p}});
+savedProducts.forEach(p=>{const id=Number(p.id);if(!products.some(x=>x.id===id))products.push({...p,id})});
 let cart=loadData("cafeCart",[]);
 let orderHistory=loadData("cafeHistory",[]);
 let selectedCategory="すべて";
+let cafeOpen=loadData("cafeIsOpen",true)!==false;
+let adminLoggedIn=false;
 const yen=n=>"¥"+Number(n).toLocaleString("ja-JP");
-function saveData(){localStorage.setItem("cafeProducts",JSON.stringify(products));localStorage.setItem("cafeCart",JSON.stringify(cart));localStorage.setItem("cafeHistory",JSON.stringify(orderHistory))}
+const storedProductSequence=Number(loadData("cafeNextProductId",1));
+let productIdSequence=Math.max(Number.isSafeInteger(storedProductSequence)&&storedProductSequence>0?storedProductSequence:1,...products.map(p=>Number(p.id)+1));
+function nextProductId(){while(products.some(p=>Number(p.id)===productIdSequence))productIdSequence++;return productIdSequence++}
+function saveData(){localStorage.setItem("cafeProducts",JSON.stringify(products));localStorage.setItem("cafeCart",JSON.stringify(cart));localStorage.setItem("cafeHistory",JSON.stringify(orderHistory));localStorage.setItem("cafeNextProductId",String(productIdSequence))}
 function normalize(s){return String(s??"").normalize("NFKC").toLocaleLowerCase("ja").replace(/\s+/g,"")}
 function safe(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".nav-button").forEach(b=>b.classList.toggle("active",b.dataset.screen===id));window.scrollTo({top:0,behavior:"smooth"});if(id==="paymentScreen"){updatePaymentMethod();updateChange()}}
+function renderCafeStatus(){
+ const label=cafeOpen?"本日営業中":"本日閉店中";
+ document.getElementById("cafeStatus").classList.toggle("closed",!cafeOpen);
+ document.getElementById("cafeStatusLabel").textContent=label;
+ document.getElementById("cafeStatus").setAttribute("aria-label",`営業状態：${label}`);
+ document.getElementById("cafeClosedNotice").hidden=cafeOpen;
+ document.getElementById("adminCafeStatus").textContent=cafeOpen?"営業中です。商品を注文できます。":"閉店中です。新しい注文は受け付けていません。";
+ document.getElementById("toggleCafeStatus").textContent=cafeOpen?"営業を終了する":"営業を再開する";
+ document.getElementById("checkout").disabled=!cafeOpen;
+ document.querySelectorAll('.nav-button[data-screen]:not([data-screen="adminScreen"])').forEach(button=>{button.disabled=!cafeOpen;button.setAttribute("aria-disabled",String(!cafeOpen))});
+}
+function setCafeOpen(open){
+ cafeOpen=open;
+ localStorage.setItem("cafeIsOpen",JSON.stringify(cafeOpen));
+ renderCafeStatus();
+ renderProducts();
+ const activeScreen=document.querySelector(".screen.active")?.id;
+ if(open&&activeScreen==="adminScreen")showScreen("productsScreen");
+ else if(!open)showScreen("systemStoppedScreen");
+}
+function showScreen(id){if(!cafeOpen&&!["adminScreen","adminLoginScreen","systemStoppedScreen"].includes(id))id="systemStoppedScreen";document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".nav-button").forEach(b=>b.classList.toggle("active",b.dataset.screen===id));window.scrollTo({top:0,behavior:"smooth"});if(id==="paymentScreen"){updatePaymentMethod();updateChange()}}
 document.querySelectorAll("[data-screen]").forEach(b=>b.addEventListener("click",()=>showScreen(b.dataset.screen)));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showScreen(b.dataset.go)));
 function renderProducts(){
  const word=normalize(document.getElementById("search").value);
  const shown=products.filter(p=>(selectedCategory==="すべて"||p.category===selectedCategory)&&(!word||normalize(p.name+p.category).includes(word)));
  document.getElementById("searchMessage").textContent=`検索結果：${shown.length}件`;
- document.getElementById("products").innerHTML=shown.length?shown.map(p=>`<article class="product"><div class="product-photo">${productImages[p.name]?`<img src="${productImages[p.name]}" alt="${safe(p.name)}">`:"商品画像"}</div><div class="product-info"><div class="product-name">${safe(p.name)}</div><div class="price">${yen(p.price)}</div><div class="stock">在庫：${p.stock}</div></div><button class="add" data-add="${p.id}" ${p.stock<=0?"disabled":""}>追加</button></article>`).join(""):'<p class="empty">商品が見つかりません。商品名を確認してください。</p>';
+ document.getElementById("products").innerHTML=shown.length?shown.map(p=>`<article class="product"><div class="product-photo">${productImages[p.name]?`<img src="${productImages[p.name]}" alt="${safe(p.name)}" loading="lazy">`:"<span>写真準備中</span>"}</div><div class="product-info"><div class="product-name">${safe(p.name)}</div><div class="price">${yen(p.price)}</div><div class="stock">${p.stock>0?`在庫：${p.stock}`:"本日売り切れ"}</div></div><button class="add" data-add="${p.id}" ${!cafeOpen||p.stock<=0?"disabled":""}>${!cafeOpen?"営業終了中":"注文に追加"}</button></article>`).join(""):'<p class="empty">商品が見つかりません。商品名やカテゴリーを変えてお試しください。</p>';
 }
 function total(){return cart.reduce((s,i)=>s+i.price*i.quantity,0)}
 function renderCart(){
@@ -77,8 +107,8 @@ function updatePaymentMethod(){
 function updateChange(){const method=document.getElementById("paymentMethod").value;const t=document.getElementById("payment").value;const diff=(t===""?0:Number(t))-total();document.getElementById("changeLabel").textContent=diff<0?"不足金額":"お釣り";document.getElementById("change").textContent=yen(Math.abs(diff));if(method!=="現金")document.getElementById("change").textContent=yen(0)}
 function renderHistory(){document.getElementById("history").innerHTML=orderHistory.length?orderHistory.map((o,i)=>`<article class="history-item"><strong>注文 ${orderHistory.length-i}</strong>　${safe(o.date)}<br>${o.items.map(x=>`${safe(x.name)} × ${x.quantity}`).join("、")}<br>合計：<strong>${yen(o.total)}</strong>　支払方法：${safe(o.method||"現金")}　${(o.method||"現金")==="現金"?`支払：${yen(o.payment)}　お釣り：${yen(o.change)}`:"支払額："+yen(o.payment)}</article>`).join(""):'<p class="empty">注文履歴はありません。</p>'}
 function notice(s,id="notice"){document.getElementById(id).textContent=s}
-function add(id){const p=products.find(x=>x.id===id);if(!p||p.stock<=0)return;const item=cart.find(x=>x.id===id);if(item){if(item.quantity>=p.stock){notice("在庫数を超えて注文できません。");return}item.quantity++}else cart.push({id:p.id,name:p.name,price:p.price,quantity:1});saveData();renderCart();renderProducts();notice(p.name+"を注文に追加しました。")}
-function quantity(id,d){const item=cart.find(x=>x.id===id),p=products.find(x=>x.id===id);if(!item)return;const n=item.quantity+d;if(n<=0)cart=cart.filter(x=>x.id!==id);else if(!p||n>p.stock){notice("在庫数を超えて注文できません。");return}else item.quantity=n;saveData();renderCart();renderProducts()}
+function add(id){if(!cafeOpen){notice("ただいま閉店中のため、注文を受け付けていません。");return}const p=products.find(x=>x.id===id);if(!p||p.stock<=0)return;const item=cart.find(x=>x.id===id);if(item){if(item.quantity>=p.stock){notice("在庫数を超えて注文できません。");return}item.quantity++}else cart.push({id:p.id,name:p.name,category:p.category,price:p.price,quantity:1});saveData();renderCart();renderProducts();notice(p.name+"を注文に追加しました。")}
+function quantity(id,d){const item=cart.find(x=>x.id===id),p=products.find(x=>x.id===id);if(!item)return;if(d>0&&!cafeOpen){notice("ただいま閉店中のため、注文数を増やせません。");return}const n=item.quantity+d;if(n<=0)cart=cart.filter(x=>x.id!==id);else if(!p||n>p.stock){notice("在庫数を超えて注文できません。");return}else item.quantity=n;saveData();renderCart();renderProducts()}
 document.getElementById("categories").addEventListener("click",e=>{const b=e.target.closest("[data-category]");if(!b)return;selectedCategory=b.dataset.category;document.querySelectorAll(".category").forEach(x=>x.classList.toggle("active",x===b));renderProducts()});
 document.getElementById("search").addEventListener("input",renderProducts);
 document.getElementById("products").addEventListener("click",e=>{const b=e.target.closest("[data-add]");if(b)add(Number(b.dataset.add))});
@@ -86,7 +116,10 @@ document.getElementById("cart").addEventListener("click",e=>{const b=e.target.cl
 document.getElementById("payment").addEventListener("input",updateChange);
 document.getElementById("paymentMethod").addEventListener("change",updatePaymentMethod);
 document.getElementById("checkout").addEventListener("click",()=>{
+ if(!cafeOpen){alert("ただいま閉店中のため、会計を確定できません。");return}
  if(!cart.length){alert("注文する商品を追加してください。");showScreen("productsScreen");return}
+ const unavailable=cart.find(i=>{const p=products.find(x=>x.id===i.id);return !p||p.stock<i.quantity});
+ if(unavailable){alert(`${unavailable.name}の在庫が不足しています。注文内容を確認してください。`);renderProducts();renderCart();showScreen("orderScreen");return}
  const sum=total(),method=document.getElementById("paymentMethod").value,raw=document.getElementById("payment").value;
  let pay=sum,change=0;
  if(method==="現金"){
@@ -94,15 +127,15 @@ document.getElementById("checkout").addEventListener("click",()=>{
   if(raw===""||!Number.isFinite(pay)||pay<sum){alert("お預かり金額が合計金額より少ないです。金額を確認してください。");return}
   change=pay-sum;
  }
- orderHistory.unshift({date:new Date().toLocaleString("ja-JP"),items:cart.map(x=>({...x})),total:sum,payment:pay,change,method});
+ orderHistory.unshift({date:new Date().toLocaleString("ja-JP"),items:cart.map(x=>({...x,category:products.find(p=>p.id===x.id)?.category||x.category})),total:sum,payment:pay,change,method});
  cart.forEach(i=>{const p=products.find(x=>x.id===i.id);if(p)p.stock=Math.max(0,p.stock-i.quantity)});
  cart=[];document.getElementById("payment").value="";saveData();renderProducts();renderCart();renderHistory();notice("注文を確定しました。","paymentNotice");alert(`注文を確定しました。\\n合計：${yen(sum)}\\nお釣り：${yen(pay-sum)}`);showScreen("historyScreen");
 });
 document.getElementById("clearHistory").addEventListener("click",()=>{if(confirm("注文履歴を削除しますか？")){orderHistory=[];saveData();renderHistory()}});
 renderProducts();renderCart();renderHistory();showScreen("productsScreen");
+renderCafeStatus();
 
 // 管理者機能（ブラウザ内で動作する学習用デモ）
-let adminLoggedIn = false;
 const adminNav = document.getElementById("adminNav");
 adminNav.addEventListener("click", () => {
   if (adminLoggedIn) { showScreen("adminScreen"); renderAdmin(); }
@@ -115,6 +148,11 @@ document.getElementById("adminLoginButton").addEventListener("click", () => {
   else document.getElementById("adminLoginError").textContent="ユーザー名またはパスワードが違います。";
 });
 document.getElementById("adminLogout").addEventListener("click",()=>{adminLoggedIn=false;showScreen("productsScreen")});
+document.getElementById("toggleCafeStatus").addEventListener("click",()=>{
+ if(!adminLoggedIn)return;
+ if(cafeOpen&&!confirm("営業を終了しますか？新しい注文を受け付けなくなります。"))return;
+ setCafeOpen(!cafeOpen);
+});
 function resetProductForm(){document.getElementById("productForm").reset();document.getElementById("editProductId").value="";document.getElementById("adminProductCategory").value="ドリンク"}
 document.getElementById("productFormReset").addEventListener("click",resetProductForm);
 document.getElementById("productForm").addEventListener("submit",e=>{
@@ -124,10 +162,10 @@ document.getElementById("productForm").addEventListener("submit",e=>{
  const category=document.getElementById("adminProductCategory").value;
  const price=Number(document.getElementById("adminProductPrice").value);
  const stock=Number(document.getElementById("adminProductStock").value);
- if(!name||price<0||stock<0||!Number.isFinite(price)||!Number.isFinite(stock)){alert("商品情報を正しく入力してください。");return}
- if(idText){const p=products.find(x=>x.id===Number(idText));if(p)Object.assign(p,{name,category,price,stock})}
- else {const id=Math.max(0,...products.map(p=>Number(p.id)||0))+1;products.push({id,name,category,price,stock})}
- saveData();resetProductForm();renderProducts();renderAdmin();alert("商品情報を保存しました。");
+ if(!name||price<0||stock<0||!Number.isInteger(price)||!Number.isInteger(stock)){alert("商品情報を正しく入力してください。");return}
+ if(idText){const p=products.find(x=>x.id===Number(idText));if(!p){alert("編集対象の商品が見つかりません。");return}Object.assign(p,{name,category,price,stock});cart.filter(i=>i.id===p.id).forEach(i=>Object.assign(i,{name,category,price}))}
+ else {const id=nextProductId();products.push({id,name,category,price,stock})}
+ saveData();resetProductForm();renderProducts();renderCart();renderAdmin();alert("商品情報を保存しました。");
 });
 document.getElementById("adminProductTable").addEventListener("click",e=>{
  const b=e.target.closest("button");if(!b||!adminLoggedIn)return;const id=Number(b.dataset.editProduct||b.dataset.deleteProduct);const p=products.find(x=>x.id===id);if(!p)return;
@@ -143,7 +181,7 @@ function renderAdmin(){if(!adminLoggedIn)return;
  renderSalesAnalysis();
 }
 function renderSalesAnalysis(){if(!adminLoggedIn)return;const orders=periodOrders();const revenue=orders.reduce((s,o)=>s+Number(o.total||0),0);const qty=orders.reduce((s,o)=>s+(o.items||[]).reduce((a,i)=>a+Number(i.quantity||0),0),0);const method={},itemMap={},categoryMap={};
- orders.forEach(o=>{const m=o.method||"現金";method[m]=(method[m]||0)+Number(o.total||0);(o.items||[]).forEach(i=>{itemMap[i.name]=(itemMap[i.name]||0)+Number(i.quantity||0);const p=products.find(p=>p.id===i.id);const c=p?p.category:"その他";categoryMap[c]=(categoryMap[c]||0)+Number(i.quantity||0)})});
+ orders.forEach(o=>{const m=o.method||"現金";method[m]=(method[m]||0)+Number(o.total||0);(o.items||[]).forEach(i=>{itemMap[i.name]=(itemMap[i.name]||0)+Number(i.quantity||0);const p=products.find(p=>p.id===i.id);const c=i.category|| (p?p.category:"その他");categoryMap[c]=(categoryMap[c]||0)+Number(i.quantity||0)})});
  const bars=(obj,unit="個")=>{const entries=Object.entries(obj).sort((a,b)=>b[1]-a[1]);const max=Math.max(1,...entries.map(x=>x[1]));return entries.length?entries.map(([k,v])=>`<div class="bar-row"><div class="bar-label"><span>${safe(k)}</span><strong>${unit==="円"?yen(v):v+unit}</strong></div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(2,v/max*100)}%"></div></div></div>`).join(""):'<p class="empty">データがありません。</p>'};
  const top=Object.entries(itemMap).sort((a,b)=>b[1]-a[1]).slice(0,5).reduce((o,[k,v])=>(o[k]=v,o),{});
  document.getElementById("salesAnalysis").innerHTML=`<div class="admin-stats"><div class="stat-card"><span>選択期間の売上</span><strong>${yen(revenue)}</strong></div><div class="stat-card"><span>注文数</span><strong>${orders.length} 件</strong></div><div class="stat-card"><span>販売数量</span><strong>${qty} 個</strong></div></div><div class="analysis-grid"><div class="analysis-card"><h4>カテゴリー別販売数量</h4>${bars(categoryMap)}</div><div class="analysis-card"><h4>売れ筋商品 TOP 5</h4>${bars(top)}</div><div class="analysis-card"><h4>支払方法別売上</h4>${bars(method,"円")}</div><div class="analysis-card"><h4>在庫が少ない商品（5個以下）</h4>${products.filter(p=>Number(p.stock)<=5).sort((a,b)=>a.stock-b.stock).map(p=>`<div class="bar-row"><div class="bar-label"><span>${safe(p.name)}</span><strong>残り ${p.stock} 個</strong></div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(3,Number(p.stock)/5*100)}%"></div></div></div>`).join("")||'<p class="empty">在庫が少ない商品はありません。</p>'}</div></div>`;
