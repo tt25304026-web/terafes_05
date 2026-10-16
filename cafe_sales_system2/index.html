@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cafe販売システム</title>
-  <link rel="stylesheet" href="style.css?v=20261016-product-photos">
+  <link rel="stylesheet" href="style.css?v=20261016-language-toggle">
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -22,10 +22,13 @@
           <small>学園祭カフェ 販売システム</small>
         </span>
       </a>
-      <span class="open-badge" id="cafeStatus" aria-live="polite">
-        <span aria-hidden="true"></span>
-        <span id="cafeStatusLabel">本日営業中</span>
-      </span>
+      <div class="header-actions">
+        <span class="open-badge" id="cafeStatus" aria-live="polite">
+          <span aria-hidden="true"></span>
+          <span id="cafeStatusLabel">本日営業中</span>
+        </span>
+        <button class="language-button" id="languageToggle" type="button">English</button>
+      </div>
     </div>
   </header>
 
