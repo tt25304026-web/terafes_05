@@ -21,11 +21,7 @@ const translations={
  "ただいま営業を終了しています":"We are currently closed",
  "システムを停止しています。ご利用を再開するには、管理者にお問い合わせください。":"The system is paused. Please contact an administrator to resume service.",
  "管理者ログイン":"Admin login",
- "🔐 管理者ログイン":"🔐 Admin login",
  "選択した商品の数量を変更したり、削除したりできます。":"Change quantities or remove items from your order.",
- "🛒 注文内容":"🛒 Your order",
- "🎫 会計":"🎫 Checkout",
- "📋 注文履歴":"📋 Order history",
  "合計":"Total",
  "商品一覧に戻る":"Back to menu",
  "← 商品一覧に戻る":"← Back to menu",
@@ -56,7 +52,6 @@ const translations={
  "ログイン":"Log in",
  "戻る":"Back",
  "管理者ダッシュボード":"Admin dashboard",
- "🛠 管理者ダッシュボード":"🛠 Admin dashboard",
  "商品・在庫・売上・販売状況を管理できます。":"Manage products, inventory, revenue, and sales.",
  "管理者専用機能を利用するにはログインしてください。":"Log in to access administrator features.",
  "ログアウト":"Log out",
@@ -124,6 +119,21 @@ const translations={
  "操作":"Actions",
  "その他":"Other",
  "累計売上":"Total revenue",
+ "商品カテゴリー":"Categories",
+ "現在の注文":"Current order",
+ "小計":"Subtotal",
+ "税（10%）":"Tax (10%)",
+ "合計（税込）":"Total (incl. tax)",
+ "割引（10%）":"Discount (10%)",
+ "割引を適用（10%）":"Apply discount (10%)",
+ "割引を取消":"Cancel discount",
+ "選択商品を取消":"Void selected item",
+ "カートをクリア":"Clear cart",
+ "割引を適用しました。":"10% discount applied.",
+ "割引を取り消しました。":"Discount canceled.",
+ "注文から取り消す商品を選択してください。":"Select an order item to void.",
+ "カートをクリアしますか？":"Clear the current cart?",
+ "税込":"incl. tax",
  "注文数":"Orders",
  "在庫少（5個以下）":"Low stock (5 or fewer)",
  "商品":"products",
@@ -247,13 +257,17 @@ savedProducts.forEach(p=>{const id=Number(p.id);if(!products.some(x=>x.id===id))
 let cart=loadData("cafeCart",[]);
 let orderHistory=loadData("cafeHistory",[]);
 let selectedCategory="すべて";
+let discountApplied=loadData("cafeDiscountApplied",false)===true;
+let selectedCartItemId=null;
+const TAX_RATE=0.1;
+const DISCOUNT_RATE=0.1;
 let cafeOpen=loadData("cafeIsOpen",true)!==false;
 let adminLoggedIn=false;
 const yen=n=>"¥"+Number(n).toLocaleString("ja-JP");
 const storedProductSequence=Number(loadData("cafeNextProductId",1));
 let productIdSequence=Math.max(Number.isSafeInteger(storedProductSequence)&&storedProductSequence>0?storedProductSequence:1,...products.map(p=>Number(p.id)+1));
 function nextProductId(){while(products.some(p=>Number(p.id)===productIdSequence))productIdSequence++;return productIdSequence++}
-function saveData(){localStorage.setItem("cafeProducts",JSON.stringify(products));localStorage.setItem("cafeCart",JSON.stringify(cart));localStorage.setItem("cafeHistory",JSON.stringify(orderHistory));localStorage.setItem("cafeNextProductId",String(productIdSequence))}
+function saveData(){if(!cart.length)discountApplied=false;localStorage.setItem("cafeProducts",JSON.stringify(products));localStorage.setItem("cafeCart",JSON.stringify(cart));localStorage.setItem("cafeHistory",JSON.stringify(orderHistory));localStorage.setItem("cafeNextProductId",String(productIdSequence));localStorage.setItem("cafeDiscountApplied",JSON.stringify(discountApplied))}
 function normalize(s){return String(s??"").normalize("NFKC").toLocaleLowerCase("ja").replace(/\s+/g,"")}
 function safe(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderCafeStatus(){
@@ -283,13 +297,42 @@ function renderProducts(){
  const word=normalize(document.getElementById("search").value);
  const shown=products.filter(p=>(selectedCategory==="すべて"||p.category===selectedCategory)&&(!word||normalize(p.name+t(p.name)+p.category+t(p.category)).includes(word)));
  document.getElementById("searchMessage").textContent=currentLanguage==="en"?`${t("検索結果")}: ${shown.length} ${t("件")}`:`${t("検索結果")}：${shown.length}${t("件")}`;
- document.getElementById("products").innerHTML=shown.length?shown.map(p=>`<article class="product"><div class="product-photo">${productImages[p.name]?`<img src="${productImages[p.name]}" alt="${safe(t(p.name))}" loading="lazy">`:`<span>${t("写真準備中")}</span>`}</div><div class="product-info"><div class="product-name">${safe(t(p.name))}</div><div class="price">${yen(p.price)}</div><div class="stock">${p.stock>0?`${t("在庫：")}${p.stock}`:t("本日売り切れ")}</div></div><button class="add" data-add="${p.id}" ${!cafeOpen||p.stock<=0?"disabled":""}>${!cafeOpen?t("営業終了中"):t("注文に追加")}</button></article>`).join(""):`<p class="empty">${t("商品が見つかりません。商品名やカテゴリーを変えてお試しください。")}</p>`;
+ document.getElementById("products").innerHTML=shown.length?shown.map(p=>`<button class="product${p.stock<=0?" out-of-stock":""}" data-add="${p.id}" ${!cafeOpen||p.stock<=0?"disabled":""}><span class="product-photo" data-stock-label="${safe(t("本日売り切れ"))}">${productImages[p.name]?`<img src="${productImages[p.name]}" alt="" loading="lazy">`:`<span>${t("写真準備中")}</span>`}</span><span class="product-info"><span class="product-name">${safe(t(p.name))}</span><span class="price">${yen(p.price)}</span><span class="stock">${p.stock>0?`${t("在庫：")}${p.stock}`:t("本日売り切れ")}</span></span></button>`).join(""):`<p class="empty">${t("商品が見つかりません。商品名やカテゴリーを変えてお試しください。")}</p>`;
 }
-function total(){return cart.reduce((s,i)=>s+i.price*i.quantity,0)}
+function priceBreakdown(){
+ const subtotal=cart.reduce((sum,item)=>sum+Number(item.price)*Number(item.quantity),0);
+ const discount=discountApplied?Math.min(subtotal,Math.round(subtotal*DISCOUNT_RATE)):0;
+ const taxable=Math.max(0,subtotal-discount);
+ const tax=Math.round(taxable*TAX_RATE);
+ return {subtotal,discount,tax,total:Math.max(0,taxable+tax)};
+}
+function total(){return priceBreakdown().total}
+function cartMarkup(){
+ return cart.length?cart.map(i=>`<div class="order-row${selectedCartItemId===i.id?" selected":""}" data-select-item="${i.id}"><span class="order-thumb">${productImages[i.name]?`<img src="${productImages[i.name]}" alt="" loading="lazy">`:"☕"}</span><div class="order-item-copy"><div class="order-name">${safe(t(i.name))}</div><div class="order-detail">${yen(i.price)} × ${i.quantity}</div><div class="qty-controls"><button type="button" data-minus="${i.id}" aria-label="${currentLanguage==="en"?"Decrease quantity":"数量を減らす"}">−</button><span>${i.quantity}</span><button type="button" data-plus="${i.id}" aria-label="${currentLanguage==="en"?"Increase quantity":"数量を増やす"}">＋</button><button class="remove" type="button" data-remove="${i.id}" aria-label="${currentLanguage==="en"?"Remove item":"商品を削除"}">×</button></div></div><div class="order-price">${yen(i.price*i.quantity)}</div></div>`).join(""):`<p class="empty">${t("商品を追加してください。")}</p>`;
+}
+function renderPriceBreakdown(){
+ const prices=priceBreakdown();
+ [["posSubtotal","posDiscount","posTax","posTotal","posDiscountRow"],["orderSubtotal","orderDiscount","orderTax","total","orderDiscountRow"],["paymentSubtotal","paymentDiscount","paymentTax","paymentTotal","paymentDiscountRow"]].forEach(([subtotalId,discountId,taxId,totalId,rowId])=>{
+  document.getElementById(subtotalId).textContent=yen(prices.subtotal);
+  document.getElementById(discountId).textContent=`−${yen(prices.discount)}`;
+  document.getElementById(taxId).textContent=yen(prices.tax);
+  document.getElementById(totalId).textContent=yen(prices.total);
+  document.getElementById(rowId).hidden=!discountApplied;
+ });
+ ["discountButton","orderDiscountButton","paymentDiscountButton"].forEach(id=>{
+  const button=document.getElementById(id);
+  button.disabled=cart.length===0;
+  button.textContent=t(discountApplied?"割引を取消":"割引を適用（10%）");
+ });
+ document.getElementById("voidItemButton").disabled=!selectedCartItemId||!cart.some(item=>item.id===selectedCartItemId);
+ document.getElementById("clearCartButton").disabled=cart.length===0;
+}
 function renderCart(){
  document.getElementById("cartBadge").textContent=cart.reduce((s,i)=>s+i.quantity,0);
- document.getElementById("cart").innerHTML=cart.length?cart.map(i=>`<div class="order-row"><div><div class="order-name">${safe(t(i.name))}</div><div class="order-detail">${yen(i.price)} × ${i.quantity}</div><div class="qty-controls"><button data-minus="${i.id}" aria-label="${currentLanguage==="en"?"Decrease quantity":"数量を減らす"}">−</button><span>${i.quantity}</span><button data-plus="${i.id}" aria-label="${currentLanguage==="en"?"Increase quantity":"数量を増やす"}">＋</button><button class="remove" data-remove="${i.id}">${t("削除")}</button></div></div><div class="order-price">${yen(i.price*i.quantity)}</div></div>`).join(""):`<p class="empty">${t("商品を追加してください。")}</p>`;
- document.getElementById("total").textContent=yen(total());document.getElementById("paymentTotal").textContent=yen(total());updateChange();
+ if(selectedCartItemId&&!cart.some(item=>item.id===selectedCartItemId))selectedCartItemId=null;
+ document.getElementById("cart").innerHTML=cartMarkup();
+ document.getElementById("posCart").innerHTML=cartMarkup();
+ renderPriceBreakdown();updateChange();
 }
 function updatePaymentMethod(){
  const method=document.getElementById("paymentMethod").value;
@@ -300,14 +343,47 @@ function updatePaymentMethod(){
  updateChange();
 }
 function updateChange(){const method=document.getElementById("paymentMethod").value;const cashInput=document.getElementById("payment").value;const diff=(cashInput===""?0:Number(cashInput))-total();document.getElementById("changeLabel").textContent=t(diff<0?"不足金額":"お釣り");document.getElementById("change").textContent=yen(Math.abs(diff));if(method!=="現金")document.getElementById("change").textContent=yen(0)}
-function renderHistory(){document.getElementById("history").innerHTML=orderHistory.length?orderHistory.map((o,i)=>`<article class="history-item"><strong>${t("注文")} ${orderHistory.length-i}</strong>　${safe(o.date)}<br>${o.items.map(x=>`${safe(t(x.name))} × ${x.quantity}`).join(currentLanguage==="en"?", ":"、")}<br>${t("合計：")}<strong>${yen(o.total)}</strong>　${t("支払方法：")}${safe(t(o.method||"現金"))}　${(o.method||"現金")==="現金"?`${t("支払：")}${yen(o.payment)}　${t("お釣り：")}${yen(o.change)}`:`${t("支払額：")}${yen(o.payment)}`}</article>`).join(""):`<p class="empty">${t("注文履歴はありません。")}</p>`}
+function renderHistory(){document.getElementById("history").innerHTML=orderHistory.length?orderHistory.map((o,i)=>`<article class="history-item"><strong>${t("注文")} ${orderHistory.length-i}</strong>　${safe(o.date)}<br>${o.items.map(x=>`${safe(t(x.name))} × ${x.quantity}`).join(currentLanguage==="en"?", ":"、")}<br>${Number.isFinite(Number(o.subtotal))?`${t("小計")} ${yen(o.subtotal)}　${t("割引（10%）")} −${yen(o.discount||0)}　${t("税（10%）")} ${yen(o.tax||0)}<br>`:""}${t("合計：")}<strong>${yen(o.total)}</strong>　${t("支払方法：")}${safe(t(o.method||"現金"))}　${(o.method||"現金")==="現金"?`${t("支払：")}${yen(o.payment)}　${t("お釣り：")}${yen(o.change)}`:`${t("支払額：")}${yen(o.payment)}`}</article>`).join(""):`<p class="empty">${t("注文履歴はありません。")}</p>`}
 function notice(s,id="notice"){document.getElementById(id).textContent=s}
 function add(id){if(!cafeOpen){notice(t("ただいま閉店中のため、注文を受け付けていません。"));return}const p=products.find(x=>x.id===id);if(!p||p.stock<=0)return;const item=cart.find(x=>x.id===id);if(item){if(item.quantity>=p.stock){notice(t("在庫数を超えて注文できません。"));return}item.quantity++}else cart.push({id:p.id,name:p.name,category:p.category,price:p.price,quantity:1});saveData();renderCart();renderProducts();notice(`${t(p.name)}${t("注文を追加しました。")}`)}
 function quantity(id,d){const item=cart.find(x=>x.id===id),p=products.find(x=>x.id===id);if(!item)return;if(d>0&&!cafeOpen){notice(t("ただいま閉店中のため、注文数を増やせません。"));return}const n=item.quantity+d;if(n<=0)cart=cart.filter(x=>x.id!==id);else if(!p||n>p.stock){notice(t("在庫数を超えて注文できません。"));return}else item.quantity=n;saveData();renderCart();renderProducts()}
 document.getElementById("categories").addEventListener("click",e=>{const b=e.target.closest("[data-category]");if(!b)return;selectedCategory=b.dataset.category;document.querySelectorAll(".category").forEach(x=>x.classList.toggle("active",x===b));renderProducts()});
 document.getElementById("search").addEventListener("input",renderProducts);
 document.getElementById("products").addEventListener("click",e=>{const b=e.target.closest("[data-add]");if(b)add(Number(b.dataset.add))});
-document.getElementById("cart").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.plus)quantity(Number(b.dataset.plus),1);if(b.dataset.minus)quantity(Number(b.dataset.minus),-1);if(b.dataset.remove){cart=cart.filter(x=>x.id!==Number(b.dataset.remove));saveData();renderCart();renderProducts()}});
+function handleCartClick(e){
+ const button=e.target.closest("button");
+ if(button){
+  if(button.dataset.plus)quantity(Number(button.dataset.plus),1);
+  else if(button.dataset.minus)quantity(Number(button.dataset.minus),-1);
+  else if(button.dataset.remove)removeOrderItem(Number(button.dataset.remove));
+  return;
+ }
+ const row=e.target.closest("[data-select-item]");
+ if(row){selectedCartItemId=Number(row.dataset.selectItem);renderCart()}
+}
+function removeOrderItem(id){
+ cart=cart.filter(item=>item.id!==id);
+ if(selectedCartItemId===id)selectedCartItemId=null;
+ saveData();renderCart();renderProducts();
+}
+document.getElementById("cart").addEventListener("click",handleCartClick);
+document.getElementById("posCart").addEventListener("click",handleCartClick);
+function toggleDiscount(){
+ if(!cart.length)return;
+ discountApplied=!discountApplied;
+ saveData();renderCart();
+ notice(t(discountApplied?"割引を適用しました。":"割引を取り消しました。"));
+}
+["discountButton","orderDiscountButton","paymentDiscountButton"].forEach(id=>document.getElementById(id).addEventListener("click",toggleDiscount));
+document.getElementById("voidItemButton").addEventListener("click",()=>{
+ if(!selectedCartItemId){notice(t("注文から取り消す商品を選択してください。"));return}
+ removeOrderItem(selectedCartItemId);
+});
+document.getElementById("clearCartButton").addEventListener("click",()=>{
+ if(!cart.length||!confirm(t("カートをクリアしますか？")))return;
+ cart=[];selectedCartItemId=null;discountApplied=false;
+ saveData();renderCart();renderProducts();
+});
 document.getElementById("payment").addEventListener("input",updateChange);
 document.getElementById("paymentMethod").addEventListener("change",updatePaymentMethod);
 document.getElementById("checkout").addEventListener("click",()=>{
@@ -315,16 +391,16 @@ document.getElementById("checkout").addEventListener("click",()=>{
  if(!cart.length){alert(t("注文する商品を追加してください。"));showScreen("productsScreen");return}
  const unavailable=cart.find(i=>{const p=products.find(x=>x.id===i.id);return !p||p.stock<i.quantity});
  if(unavailable){alert(`${t(unavailable.name)}${t("の在庫が不足しています。注文内容を確認してください。")}`);renderProducts();renderCart();showScreen("orderScreen");return}
- const sum=total(),method=document.getElementById("paymentMethod").value,raw=document.getElementById("payment").value;
+ const prices=priceBreakdown(),sum=prices.total,method=document.getElementById("paymentMethod").value,raw=document.getElementById("payment").value;
  let pay=sum,change=0;
  if(method==="現金"){
   pay=Number(raw);
   if(raw===""||!Number.isFinite(pay)||pay<sum){alert(t("お預かり金額が合計金額より少ないです。金額を確認してください。"));return}
   change=pay-sum;
  }
- orderHistory.unshift({date:new Date().toLocaleString(currentLanguage==="en"?"en-US":"ja-JP"),items:cart.map(x=>({...x,category:products.find(p=>p.id===x.id)?.category||x.category})),total:sum,payment:pay,change,method});
+ orderHistory.unshift({date:new Date().toLocaleString(currentLanguage==="en"?"en-US":"ja-JP"),items:cart.map(x=>({...x,category:products.find(p=>p.id===x.id)?.category||x.category})),subtotal:prices.subtotal,discount:prices.discount,tax:prices.tax,total:sum,payment:pay,change,method});
  cart.forEach(i=>{const p=products.find(x=>x.id===i.id);if(p)p.stock=Math.max(0,p.stock-i.quantity)});
- cart=[];document.getElementById("payment").value="";saveData();renderProducts();renderCart();renderHistory();notice(t("注文を確定しました。"),"paymentNotice");alert(`${t("注文を確定しました。")}\n${t("合計：")}${yen(sum)}\n${t("お釣り：")}${yen(pay-sum)}`);showScreen("historyScreen");
+ cart=[];discountApplied=false;selectedCartItemId=null;document.getElementById("payment").value="";saveData();renderProducts();renderCart();renderHistory();notice(t("注文を確定しました。"),"paymentNotice");alert(`${t("注文を確定しました。")}\n${t("合計：")}${yen(sum)}\n${t("お釣り：")}${yen(pay-sum)}`);showScreen("historyScreen");
 });
 document.getElementById("clearHistory").addEventListener("click",()=>{if(confirm(t("注文履歴を削除しますか？"))){orderHistory=[];saveData();renderHistory()}});
 document.getElementById("languageToggle").addEventListener("click",()=>{
