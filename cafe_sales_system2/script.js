@@ -151,7 +151,7 @@ const translations={
  "Cafe Morrow 商品一覧へ戻る":"Back to the Cafe Morrow menu",
  "コーヒー":"Coffee",
  "紅茶":"Black tea",
- "ジュース":"Juice",
+ "ワターメロンジュース":"WaterMelon Juice",
  "カフェラテ":"Cafe latte",
  "抹茶ラテ":"Matcha latte",
  "アイスコーヒー":"Iced coffee",
@@ -206,7 +206,7 @@ function translateStaticContent(){
 const defaultProducts = [
 {id:1,name:"コーヒー",price:400,category:"ドリンク",stock:30},
 {id:2,name:"紅茶",price:350,category:"ドリンク",stock:25},
-{id:5,name:"ジュース",price:300,category:"ドリンク",stock:20},
+{id:5,name:"ワターメロンジュース",price:300,category:"ドリンク",stock:20},
 {id:7,name:"カフェラテ",price:450,category:"ドリンク",stock:20},
 {id:8,name:"抹茶ラテ",price:450,category:"ドリンク",stock:18},
 {id:9,name:"アイスコーヒー",price:400,category:"ドリンク",stock:25},
@@ -229,7 +229,7 @@ const defaultProducts = [
 const productImages={
  "コーヒー":"images/coffee.jpg",
  "紅茶":"images/tea.jpg",
- "ジュース":"images/juice.jpg",
+ "ワターメロンジュース":"images/juice.jpg",
  "カフェラテ":"images/cafe-latte.jpg",
  "抹茶ラテ":"images/抹茶ラテ.jpg",
  "アイスコーヒー":"images/iced-coffee.jpg",
