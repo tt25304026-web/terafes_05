@@ -72,6 +72,7 @@ h3 { margin: 30px 0 14px; font-size: 18px; }
 .menu-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 0 0 18px; }
 .search-box { display: flex; width: min(420px, 100%); min-height: 44px; align-items: center; gap: 10px; margin: 0; padding: 0 13px; border: 1px solid var(--line); border-radius: 9px; background: white; color: var(--muted); }
 .search-box span { font-size: 22px; line-height: 1; }
+.search-box .search-icon { display: block; width: 18px; height: 18px; }
 .search-box input { width: 100%; min-width: 0; padding: 10px 0; border: 0; outline: 0; background: transparent; color: var(--brown); font-size: 14px; }
 .search-box:focus-within { border-color: #8ca184; box-shadow: 0 0 0 3px #526c5214; }
 .menu-toolbar #searchMessage { flex: 0 0 auto; margin: 0; font-size: 12px; }
