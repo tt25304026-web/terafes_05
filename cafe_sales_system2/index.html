@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cafe販売システム</title>
-  <link rel="stylesheet" href="style.css?v=20261016-language-toggle">
+  <link rel="icon" type="image/svg+xml" href="images/cafe-morrow-logo.svg">
+  <link rel="stylesheet" href="style.css?v=20261022-header-icon">
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -23,7 +24,7 @@
         </span>
       </a>
       <label class="search-box header-search">
-        <span aria-hidden="true">⌕</span>
+        <span aria-hidden="true"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.2 4.2"/></svg></span>
         <input
           id="search"
           type="search"
@@ -58,10 +59,10 @@
         <aside class="category-sidebar" aria-label="カテゴリー">
           <h2>商品カテゴリー</h2>
           <div class="categories" id="categories">
-            <button class="category active" data-category="すべて"><span aria-hidden="true">☷</span> すべて</button>
-            <button class="category" data-category="ドリンク"><span aria-hidden="true">☕</span> ドリンク</button>
-            <button class="category" data-category="フード"><span aria-hidden="true">🥪</span> フード</button>
-            <button class="category" data-category="デザート"><span aria-hidden="true">🍰</span> デザート</button>
+            <button class="category active" data-category="すべて"><svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg> すべて</button>
+            <button class="category" data-category="ドリンク"><svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11H6.2L5 8Z"/><path d="M7 4v2m5-2v2m5-2v2m2 4h1a2 2 0 0 1 0 4h-1"/></svg> ドリンク</button>
+            <button class="category" data-category="フード"><svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 9 8-5 8 5-8 5-8-5Z"/><path d="m4 12 8 5 8-5M4 15l8 5 8-5"/></svg> フード</button>
+            <button class="category" data-category="デザート"><svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16L8 5 4 19Z"/><path d="M6 14h8M11 9l2-2m1 9h2"/></svg> デザート</button>
           </div>
         </aside>
 
