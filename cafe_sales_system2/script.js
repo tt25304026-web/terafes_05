@@ -152,6 +152,7 @@ const translations={
  "コーヒー":"Coffee",
  "紅茶":"Black tea",
  "ワターメロンジュース":"WaterMelon Juice",
+ "ウォーターメロンジュース":"WaterMelon Juice",
  "カフェラテ":"Cafe latte",
  "抹茶ラテ":"Matcha latte",
  "アイスコーヒー":"Iced coffee",
@@ -206,7 +207,7 @@ function translateStaticContent(){
 const defaultProducts = [
 {id:1,name:"コーヒー",price:400,category:"ドリンク",stock:30},
 {id:2,name:"紅茶",price:350,category:"ドリンク",stock:25},
-{id:5,name:"ワターメロンジュース",price:300,category:"ドリンク",stock:20},
+{id:5,name:"ウォーターメロンジュース",price:300,category:"ドリンク",stock:20},
 {id:7,name:"カフェラテ",price:450,category:"ドリンク",stock:20},
 {id:8,name:"抹茶ラテ",price:450,category:"ドリンク",stock:18},
 {id:9,name:"アイスコーヒー",price:400,category:"ドリンク",stock:25},
@@ -230,6 +231,7 @@ const productImages={
  "コーヒー":"images/coffee.jpg",
  "紅茶":"images/tea.jpg",
  "ワターメロンジュース":"images/juice.jpg",
+ "ウォーターメロンジュース":"images/juice.jpg",
  "カフェラテ":"images/cafe-latte.jpg",
  "抹茶ラテ":"images/抹茶ラテ.jpg",
  "アイスコーヒー":"images/iced-coffee.jpg",
@@ -249,6 +251,7 @@ const productImages={
  "アイスクリーム":"images/ice-cream.jpg",
  "フルーツタルト":"images/fruit-tart.jpg"
 };
+function productImage(product){return productImages[product.name]||(Number(product.id)===5?"images/juice.jpg":null)}
 function loadData(key,fallback){try{const x=localStorage.getItem(key);return x?JSON.parse(x):fallback}catch(e){return fallback}}
 const storedProducts=loadData("cafeProducts",[]);
 const savedProducts=Array.isArray(storedProducts)?storedProducts.filter(p=>p&&typeof p==="object"&&Number.isSafeInteger(Number(p.id))&&Number(p.id)>0):[];
@@ -297,7 +300,7 @@ function renderProducts(){
  const word=normalize(document.getElementById("search").value);
  const shown=products.filter(p=>(selectedCategory==="すべて"||p.category===selectedCategory)&&(!word||normalize(p.name+t(p.name)+p.category+t(p.category)).includes(word)));
  document.getElementById("searchMessage").textContent=currentLanguage==="en"?`${t("検索結果")}: ${shown.length} ${t("件")}`:`${t("検索結果")}：${shown.length}${t("件")}`;
- document.getElementById("products").innerHTML=shown.length?shown.map(p=>`<button class="product${p.stock<=0?" out-of-stock":""}" data-add="${p.id}" ${!cafeOpen||p.stock<=0?"disabled":""}><span class="product-photo" data-stock-label="${safe(t("本日売り切れ"))}">${productImages[p.name]?`<img src="${productImages[p.name]}" alt="" loading="lazy">`:`<span>${t("写真準備中")}</span>`}</span><span class="product-info"><span class="product-name">${safe(t(p.name))}</span><span class="price">${yen(p.price)}</span><span class="stock">${p.stock>0?`${t("在庫：")}${p.stock}`:t("本日売り切れ")}</span></span></button>`).join(""):`<p class="empty">${t("商品が見つかりません。商品名やカテゴリーを変えてお試しください。")}</p>`;
+ document.getElementById("products").innerHTML=shown.length?shown.map(p=>{const image=productImage(p);return `<button class="product${p.stock<=0?" out-of-stock":""}" data-add="${p.id}" ${!cafeOpen||p.stock<=0?"disabled":""}><span class="product-photo" data-stock-label="${safe(t("本日売り切れ"))}">${image?`<img src="${image}" alt="" loading="lazy">`:`<span>${t("写真準備中")}</span>`}</span><span class="product-info"><span class="product-name">${safe(t(p.name))}</span><span class="price">${yen(p.price)}</span><span class="stock">${p.stock>0?`${t("在庫：")}${p.stock}`:t("本日売り切れ")}</span></span></button>`}).join(""):`<p class="empty">${t("商品が見つかりません。商品名やカテゴリーを変えてお試しください。")}</p>`;
 }
 function priceBreakdown(){
  const subtotal=cart.reduce((sum,item)=>sum+Number(item.price)*Number(item.quantity),0);
@@ -308,7 +311,7 @@ function priceBreakdown(){
 }
 function total(){return priceBreakdown().total}
 function cartMarkup(){
- return cart.length?cart.map(i=>`<div class="order-row${selectedCartItemId===i.id?" selected":""}" data-select-item="${i.id}"><span class="order-thumb">${productImages[i.name]?`<img src="${productImages[i.name]}" alt="" loading="lazy">`:"☕"}</span><div class="order-item-copy"><div class="order-name">${safe(t(i.name))}</div><div class="order-detail">${yen(i.price)} × ${i.quantity}</div><div class="qty-controls"><button type="button" data-minus="${i.id}" aria-label="${currentLanguage==="en"?"Decrease quantity":"数量を減らす"}">−</button><span>${i.quantity}</span><button type="button" data-plus="${i.id}" aria-label="${currentLanguage==="en"?"Increase quantity":"数量を増やす"}">＋</button><button class="remove" type="button" data-remove="${i.id}" aria-label="${currentLanguage==="en"?"Remove item":"商品を削除"}">×</button></div></div><div class="order-price">${yen(i.price*i.quantity)}</div></div>`).join(""):`<p class="empty">${t("商品を追加してください。")}</p>`;
+ return cart.length?cart.map(i=>`<div class="order-row${selectedCartItemId===i.id?" selected":""}" data-select-item="${i.id}"><span class="order-thumb">${productImage(i)?`<img src="${productImage(i)}" alt="" loading="lazy">`:"☕"}</span><div class="order-item-copy"><div class="order-name">${safe(t(i.name))}</div><div class="order-detail">${yen(i.price)} × ${i.quantity}</div><div class="qty-controls"><button type="button" data-minus="${i.id}" aria-label="${currentLanguage==="en"?"Decrease quantity":"数量を減らす"}">−</button><span>${i.quantity}</span><button type="button" data-plus="${i.id}" aria-label="${currentLanguage==="en"?"Increase quantity":"数量を増やす"}">＋</button><button class="remove" type="button" data-remove="${i.id}" aria-label="${currentLanguage==="en"?"Remove item":"商品を削除"}">×</button></div></div><div class="order-price">${yen(i.price*i.quantity)}</div></div>`).join(""):`<p class="empty">${t("商品を追加してください。")}</p>`;
 }
 function renderPriceBreakdown(){
  const prices=priceBreakdown();
